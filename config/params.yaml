@@ -1,0 +1,27 @@
+data_ingestion:
+  raw_data_path: data/raw/startup_data.csv
+  processed_data_path: data/processed/processed_data.csv
+  final_data_path: data/final/final_data.csv
+  test_size: 0.2
+  random_state: 42
+
+feature_engineering:
+  success_thresholds:
+    funding_amount: 100  # in M USD
+    employees: 1000
+    valuation: 500  # in M USD
+  current_year: 2025
+  categorical_columns: ["Industry", "Region", "Exit Status"]
+  numerical_columns: ["Funding Amount (M USD)", "Valuation (M USD)", "Revenue (M USD)", "Employees", "Market Share (%)"]
+
+model_training:
+  model_path: models/startup_success_model.joblib
+  test_size: 0.2
+  random_state: 42
+  target_column: "Success_Status"
+  features: ["Funding_Amount_M_USD_Norm", "Valuation_M_USD_Norm", "Revenue_M_USD_Norm", "Employees_Norm", "Market_Share_%_Norm", "Startup_Age", "Industry_encoded", "Region_encoded", "Exit Status_encoded"]
+
+logging:
+  log_dir: "logs"
+  log_file: "startup_analytics.log"
+  log_level: "INFO"
