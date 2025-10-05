@@ -205,3 +205,21 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Project specific
+# Data files (keep raw data in git, exclude processed)
+data/processed/
+data/final/
+
+# Model artifacts
+models/*.joblib
+models/*.pkl
+
+# Reports and outputs
+reports/
+logs/
+deployment/
+
+# DVC
+.dvc/
+*.dvc

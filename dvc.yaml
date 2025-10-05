@@ -1,0 +1,106 @@
+stages:
+  data_ingestion:
+    cmd: python src/data_ingestion.py
+    deps:
+      - src/data_ingestion.py
+      - config/params.yaml
+      - data/raw/startup_data.csv
+    params:
+      - data_ingestion
+    outs:
+      - data/processed/processed_data.csv
+
+  feature_engineering:
+    cmd: python src/feature_engineering.py
+    deps:
+      - src/feature_engineering.py
+      - config/params.yaml
+      - data/processed/processed_data.csv
+    params:
+      - feature_engineering
+      - model_training.test_size
+      - model_training.random_state
+    outs:
+      - data/processed/train_data.csv
+      - data/processed/test_data.csv
+      - data/final/final_data.csv
+      - models/label_encoders.joblib
+
+  success_scoring:
+    cmd: python src/success_scoring.py
+    deps:
+      - src/success_scoring.py
+      - config/params.yaml
+      - data/final/final_data.csv
+    outs:
+      - reports/success_analysis.json
+      - reports/figures/success_distribution.png
+      - reports/figures/success_by_industry.png
+      - reports/figures/success_by_region.png
+      - reports/figures/funding_vs_success.png
+      - reports/figures/employees_vs_success.png
+      - reports/figures/correlation_heatmap.png
+
+  model_training:
+    cmd: python src/model_training.py
+    deps:
+      - src/model_training.py
+      - config/params.yaml
+      - data/processed/train_data.csv
+      - data/processed/test_data.csv
+    params:
+      - model_training
+    outs:
+      - models/startup_success_model.joblib
+    metrics:
+      - reports/model_metrics.json:
+          cache: false
+
+  evaluation:
+    cmd: python src/evaluation.py
+    deps:
+      - src/evaluation.py
+      - config/params.yaml
+      - models/startup_success_model.joblib
+      - data/processed/test_data.csv
+    params:
+      - model_training.features
+      - model_training.target_column
+    outs:
+      - reports/evaluation_metrics.json
+      - reports/evaluation_report.txt
+      - reports/figures/roc_curve.png
+      - reports/figures/precision_recall_curve.png
+      - reports/figures/confusion_matrix_detailed.png
+      - reports/figures/metrics_comparison.png
+
+  deployment:
+    cmd: python src/deployment.py
+    deps:
+      - src/deployment.py
+      - config/params.yaml
+      - models/startup_success_model.joblib
+      - models/label_encoders.joblib
+    outs:
+      - deployment/model.joblib
+      - deployment/encoders.joblib
+      - deployment/metadata.json
+      - deployment/api.py
+      - deployment/requirements_api.txt
+      - deployment/Dockerfile
+      - deployment/README.md
+
+# DVC remote configuration (update with your remote storage)
+remote: storage
+  # url: s3://your-bucket/startup-growth-analytics
+  # user: your-username
+  # password: your-password
+
+# Default DVC pipeline
+meta:
+  name: startup_growth_analytics
+  version: 1.0.0
+  description: MLOps pipeline for Startup Growth Analytics
+  authors:
+    - name: Your Name
+      email: your.email@example.com
